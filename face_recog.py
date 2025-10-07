@@ -14,20 +14,24 @@ def face_confidence(face_distance, face_match_threshold=0.6):
 
    if face_distance > face_match_threshold:
       return f"{round(linear_val * 100)}%"
+      # return "0%"
    else:
       value = (linear_val + ((1.0 - linear_val) * math.pow((linear_val - 0.5) * 2, 0.2))) * 100
       return f"{round(value, 2)}%"
 
 class FaceRecognition:
    # class-level variables (shared across all instances of the class)
-   face_locations= []
-   face_encodings = []
-   face_names = []
-   known_face_encodings = []
-   known_face_names = []
-   process_curr_frame = True
+   
 
    def __init__(self):
+      # instance variables
+      self.face_locations= []
+      self.face_encodings = []
+      self.face_names = []
+      self.known_face_encodings = []
+      self.known_face_names = []
+      self.process_curr_frame = True
+
       self.encode_faces()
 
    # func to encode each image in the faces dir
@@ -39,12 +43,17 @@ class FaceRecognition:
          # processes the loaded image to detect faces and generate a 128-dimensional face encoding (a numerical vector representing facial features).
          # [0] assumes that each image contains exactly one face. If an image has no faces or multiple faces, this could raise an error: Index Error
          # If multiple faces are detected, only the first face’s encoding is used
-         face_encoding = face_recognition.face_encodings(face_image)[0]
-
- 
-         # appending the names & encodings of the images
-         self.known_face_encodings.append(face_encoding)
-         self.known_face_names.append(image)
+         # error handling in case of no faces found in an image
+         try:
+            face_encoding = face_recognition.face_encodings(face_image)[0]
+            if face_encoding:
+               # appending the names & encodings of the images
+               self.known_face_encodings.append(face_encoding)
+               self.known_face_names.append(image[:len(image) - 4])
+            else:
+               print(f"No faces found in {image}")
+         except Exception as e:
+            print(f"Error processing {image}: {e}")
       
       print(self.known_face_names)
 
@@ -56,6 +65,8 @@ class FaceRecognition:
       
       while True:
          ret, frame = cap.read()
+
+         frame = cv2.flip(frame, 1)
          
          # process only every second frame
          if self.process_curr_frame:
@@ -71,7 +82,6 @@ class FaceRecognition:
             # self.face_landmarks = face_recognition.face_landmarks(rgb_small_frame)
 
             self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
-
 
             self.face_names = []
             for face_encoding in self.face_encodings:
