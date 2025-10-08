@@ -37,23 +37,23 @@ class FaceRecognition:
    # func to encode each image in the faces dir
    def encode_faces(self):
       for image in os.listdir('faces'):   # lists all files in the faces directory
-         # reads an image file from the path
-         face_image = face_recognition.load_image_file(f'faces/{image}') #
+         
+
          
          # processes the loaded image to detect faces and generate a 128-dimensional face encoding (a numerical vector representing facial features).
          # [0] assumes that each image contains exactly one face. If an image has no faces or multiple faces, this could raise an error: Index Error
          # If multiple faces are detected, only the first face’s encoding is used
          # error handling in case of no faces found in an image
-         try:
-            face_encoding = face_recognition.face_encodings(face_image)[0]
-            if face_encoding:
-               # appending the names & encodings of the images
-               self.known_face_encodings.append(face_encoding)
-               self.known_face_names.append(image[:len(image) - 4])
-            else:
-               print(f"No faces found in {image}")
-         except Exception as e:
-            print(f"Error processing {image}: {e}")
+               
+         # reads an image file from the path
+         face_image = face_recognition.load_image_file(f'faces/{image}')
+
+         face_encoding = face_recognition.face_encodings(face_image)[0]
+            
+         # appending the names & encodings of the images
+         self.known_face_encodings.append(face_encoding)
+         self.known_face_names.append(image[:len(image) - 4])
+         # self.known_face_names.append(os.path.splitext(image))
       
       print(self.known_face_names)
 
@@ -98,7 +98,7 @@ class FaceRecognition:
 
                # Find the index of the smallest distance (most likely match)
                best_match_index = np.argmin(face_distances)
-
+               
                # Checks if the closest match (based on distance) is also a valid match in matches
                # if match, return corresponding "labels"
                if matches[best_match_index]:
